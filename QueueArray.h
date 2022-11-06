@@ -1,17 +1,19 @@
 #include <string>
 #include <iostream>
 #include <limits>
+#include <memory>
 using namespace std;
 
 template <typename T>
 class QueueArray
 {
-	public : 
+	// template <typename U>
+	// friend ostream& operator<<(ostream &osObj, const QueueArray<U>& listObj);
+	// // Output relevant class attributes to the console
+	// // Pre-conditions - listObj is an array of type T elements
+	// // Post-conditions - Returns an ostream object to the calling function
 
-	friend ostream& operator<<(ostream &osObj, const QueueArray& listObj);
-	// Output relevant class attributes to the console
-	// Pre-conditions - listObj is an array of type T elements
-	// Post-conditions - Returns an ostream object to the calling function
+	public : 
 
 	/********************************
 	 *  CONSTRUCTORS & DESTRUCTORS  *
@@ -21,13 +23,13 @@ class QueueArray
 	QueueArray() = default;
 
 	// 2/5 - Default Copy Constructor
-	QueueArray(const QueueArray& otherObject) = default;
+	QueueArray(const QueueArray<T>& otherObject) = default;
 
 	// 3/5 - Default Copy Assignment
 	// QueueArray& operator=(const QueueArray& otherObject) = default;
 
 	// 4/5 Default Move Constructor -- It is noexcept by default
-	QueueArray(QueueArray&& otherObject) = default;
+	QueueArray(QueueArray<T>&& otherObject) = default;
 
 	// 5/5 Default Move Assignment -- It is noexcept by default
 	// QueueArray& operator=(QueueArray&& tempObj) = default;
@@ -96,6 +98,11 @@ class QueueArray
 	// Pre-conditions - NONE
 	// Post-conditions - Returns a bool representing the state of the list
 
+	void PrintQueue() const;
+	// Prints queue to the console
+	// Pre-conditions - NONE
+	// Post-conditions - NONE
+
 
 	
 
@@ -107,3 +114,251 @@ class QueueArray
 	unique_ptr<T[]> list;		// Use unique_ptr instead of raw ptr
 
 };
+
+
+// Ctor
+template <typename T>
+QueueArray<T>::QueueArray(int max, int front, int rear)
+	: maxSize{max}, queueFront{front}, queueRear{rear}, currentSize{0}
+{
+	list = make_unique<T[]>(maxSize);
+}
+
+// Copy
+template <typename T>
+void QueueArray<T>::Copy(const QueueArray<T>& source)
+{
+	for(int i = 0; i < source.currentSize; i++)
+	{
+		list[i] = source[i];
+	}
+}
+
+// Copy Ctor
+template <typename T>
+QueueArray<T>::QueueArray(const QueueArray<T>& otherObject, int foo)
+	: maxSize{otherObject.maxSize}, queueFront{otherObject.queueFront},
+		queueRear{otherObject.queueRear}, currentSize{otherObject.currentSize}
+{
+	list = make_unique<T[]>(otherObject.maxSize);
+	Copy(otherObject);
+}
+
+// Copy Assignment
+template <typename T>
+const QueueArray<T>& QueueArray<T>::operator=(const QueueArray<T>& otherObject)
+{
+	if (this != &otherObject)
+	{
+		Copy(otherObject);
+	}
+
+	return *this;
+}
+
+// Move Assignment
+template <typename T>
+QueueArray<T>& QueueArray<T>::operator=(QueueArray<T>&& otherObject) noexcept
+{
+	maxSize = std::move(otherObject.maxSize);
+	queueFront = std::move(otherObject.queueFront);
+	queueRear = std::move(otherObject.queueRear);
+	currentSize = std::move(otherObject.currentSize);
+	// use unique_ptr move assignment operator
+	list = make_unique<T[]>(otherObject.list);
+
+	// 1) Transfers ownership from otherObject to *thi
+	// 2) Similar to using reset()
+}
+
+template <typename T>
+bool QueueArray<T>::IsEmpty() const
+{
+	bool empty;
+
+	if(currentSize == 0)
+	{
+		empty = true;
+	}
+	else
+	{
+		empty = false;
+	}
+
+	return empty;
+}
+
+template <typename T>
+bool QueueArray<T>::IsFull() const
+{
+	bool full;
+
+	if(maxSize == queueRear)
+	{
+		full = true;
+	}
+	else
+	{
+		full = false;
+	}
+
+	return full;
+}
+
+template <typename T>
+int QueueArray<T>::Size() const
+{
+	return currentSize;
+}
+
+template <typename T>
+T QueueArray<T>::Front() const
+{
+	return list[queueFront];
+}
+template <typename T>
+void QueueArray<T>::Enqueue(const T& object)
+{
+	if(!IsFull())
+	{
+			if(currentSize == 0)
+			{
+				list[currentSize] = object;
+			}
+			else
+			{
+				list[queueRear] = object;
+				queueRear++;
+			}
+		cout << "\nElement was succesfully added.\n\n";
+		currentSize++;		
+	}
+	else
+	{
+		cout << "Sorry, the queue is full\n\n";
+	}
+}
+
+template <typename T>
+T QueueArray<T>::Dequeue()
+{
+	T tempObj;
+	
+	if(IsEmpty())
+	{
+		cout << "ERROR - Cannot dequeue from an empty list.\n\n";
+		tempObj = -999;
+
+	}
+	else
+	{
+		tempObj = list[0];
+
+		for(int i = 0; i < currentSize; i++)
+		{
+			list[i] = list[i + 1];
+		}
+		if(queueRear > 1)
+		{
+			queueRear--;
+		}
+		if(currentSize > 0)
+		{
+			currentSize--;
+		}
+
+	}
+
+	return tempObj;
+
+}
+
+
+template <typename T>
+void QueueArray<T>::PrintQueue() const
+{
+	cout << left;
+	if(IsEmpty())
+	{
+		cout << "This list is empty, so nothing was printed.\n\n";
+	}
+	else
+	{
+		cout << "Printing the list...\n";
+		for(int i = 0; i < queueRear; i++)
+		{
+			cout << "Index #" << i + 1 << ": ";
+			cout << list[i] << endl;
+		}
+
+		if(IsFull())
+		{			
+			cout << "This list is currently full at " << maxSize;
+			if(maxSize == 1)
+			{
+				cout << " element.\n\n";
+			}
+			else
+			{
+				cout << " elements.\n\n";
+			}
+		}
+		else
+		{
+			cout << "This list has " << currentSize;
+			if(currentSize == 1)
+			{
+				cout << " element\n";
+				
+			}
+			else
+			{
+				cout << " elements\n";
+			}
+			
+			cout << "There is/are " << maxSize - currentSize
+				<< " space(s) left for further enqueues\n\n";
+		}
+
+	}
+
+	cout << right;
+}
+
+// template <typename U>
+// ostream& operator<<(ostream &osObj, const QueueArray<U>& listObj)
+// {
+// 	// const int COL_WIDTH = 10;
+
+// 	osObj << left;
+	
+// 	if(QueueArray<U>::listObj.IsEmpty())
+// 	{
+// 		osObj << "This list is empty, so nothing was printed.\n\n";
+// 	}
+// 	else
+// 	{
+// 		osObj << "Printing the list...\n";
+// 			for(int i = 0; i < QueueArray<U>::listObj.queueRear; i++)
+// 			{
+// 				osObj << "Index #" << i + 1 << ": ";
+// 				osObj << QueueArray<U>::listObj.list[i] << endl;
+// 			}
+
+// 			if(QueueArray<U>::listObj.IsFull())
+// 			{			
+// 				osObj << "This list is currently full at " << QueueArray<U>::listObj.maxSize
+// 					<< " elements.\n\n";
+// 			}
+// 			else
+// 			{
+// 				osObj << "This list has " << QueueArray<U>::listObj.currentSize << " elements\n";
+// 				osObj << "There are " << QueueArray<U>::listObj.maxSize - QueueArray<U>::listObj.currentSize
+// 					  << " spaces left for further enqueues\n\n";
+// 			}
+// 	}
+
+// 	osObj << right;
+
+// 	return osObj;
+// }
