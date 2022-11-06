@@ -24,13 +24,13 @@ class QueueArray
 	QueueArray(const QueueArray& otherObject) = default;
 
 	// 3/5 - Default Copy Assignment
-	QueueArray& operator=(const QueueArray& otherObject) = default;
+	// QueueArray& operator=(const QueueArray& otherObject) = default;
 
 	// 4/5 Default Move Constructor -- It is noexcept by default
 	QueueArray(QueueArray&& otherObject) = default;
 
 	// 5/5 Default Move Assignment -- It is noexcept by default
-	QueueArray& operator=(QueueArray&& tempObj) = default;
+	// QueueArray& operator=(QueueArray&& tempObj) = default;
 
 	/****************** END DEFAULT RULE OF 5 ****************/
 
@@ -45,12 +45,12 @@ class QueueArray
 	// Post-conditions - Creates a deep copy of the other object
 
 	// Overloaded Copy Assignment
-	const QueueArray<T>& operator=(const QueueArray<T>& otherObject, int foo);
+	const QueueArray<T>& operator=(const QueueArray<T>& otherObject);
 	// Pre-conditions - Another array and an integer
 	// Post-conditions - Creates a deep copy of the other object
 
 	// Overloaded Move Assignment
-	QueueArray<T>& operator=(QueueArray<T>&& otherObject, int foo) noexcept;
+	QueueArray<T>& operator=(QueueArray<T>&& otherObject) noexcept;
 	// Pre-conditions - Another array and an integer
 	// Post-conditions - Moves data of other object into this object, leaving old obj in destructable state
 
@@ -66,7 +66,7 @@ class QueueArray
 	/********************************
 	 *     Main Queue Operations    *
 	*********************************/
-	void Enqueue(T object);
+	void Enqueue(const T& object);
 	// Inserts an element at end of queue
 	// Pre-conditions - T type object parameter must be defined
 	// Post-conditions - None, enqueued in function and returns nothing
@@ -102,8 +102,8 @@ class QueueArray
 	private :
 	int maxSize;
 	int queueFront;
-	int queueRear;
-	int currentSize;
+	int queueRear;				// Index of the next space after currentSize
+	int currentSize;			// Index of the last space of defined data
 	unique_ptr<T[]> list;		// Use unique_ptr instead of raw ptr
 
 };
