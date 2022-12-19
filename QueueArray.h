@@ -153,6 +153,9 @@ const QueueArray<T>& QueueArray<T>::operator=(const QueueArray<T>& otherObject)
 		Copy(otherObject);
 	}
 
+	list.reset();
+	list = make_unique<T[]>(maxSize);
+
 	return *this;
 }
 
@@ -171,6 +174,7 @@ QueueArray<T>& QueueArray<T>::operator=(QueueArray<T>&& otherObject) noexcept
 	// 2) Similar to using reset()
 }
 
+// Check if Queue is Empty
 template <typename T>
 bool QueueArray<T>::IsEmpty() const
 {
@@ -188,6 +192,7 @@ bool QueueArray<T>::IsEmpty() const
 	return empty;
 }
 
+// Check if queue is full
 template <typename T>
 bool QueueArray<T>::IsFull() const
 {
@@ -205,6 +210,7 @@ bool QueueArray<T>::IsFull() const
 	return full;
 }
 
+// Get size of queue
 template <typename T>
 int QueueArray<T>::Size() const
 {
